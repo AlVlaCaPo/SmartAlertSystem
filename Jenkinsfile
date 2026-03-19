@@ -7,7 +7,9 @@ pipeline {
     }
 
     environment {
-        DOCKER_IMAGE = 'auth-service:latest'
+        AUTH_IMAGE = 'auth-service:latest'
+        COLLECTOR_IMAGE = 'data-collector-service:latest'
+        ALERT_IMAGE = 'alert-service:latest'
     }
 
     stages {
@@ -19,11 +21,11 @@ pipeline {
 
         stage('Build & Test') {
             steps {
-                sh 'mvn clean package -pl auth-service -am'
+                sh 'mvn clean test'
             }
             post {
                 always {
-                    junit 'auth-service/target/surefire-reports/*.xml'
+                    junit '**/target/surefire-reports/*.xml'
                 }
             }
         }
@@ -31,8 +33,9 @@ pipeline {
         stage('Docker Build') {
             steps {
                 script {
-                    // El comando 'mvn clean package' en el Dockerfile ya ejecuta los tests
-                    sh "docker build -t ${DOCKER_IMAGE} -f auth-service/Dockerfile ."
+                    sh "docker build -t ${AUTH_IMAGE} -f auth-service/Dockerfile ."
+                    sh "docker build -t ${COLLECTOR_IMAGE} -f data-collector-service/Dockerfile ."
+                    sh "docker build -t ${ALERT_IMAGE} -f alert-service/Dockerfile ."
                 }
             }
         }

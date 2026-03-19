@@ -67,10 +67,36 @@ services:
       - "8082:8080"
       - "50000:50000"
     volumes:
-      - jenkins_home:/var/jenkins_home
+      - ./jenkins_data:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - auth-service
+      - data-collector-service
+      - alert-service
+
+  data-collector-service:
+    build:
+      context: .
+      dockerfile: data-collector-service/Dockerfile
+    container_name: data-collector-service
+    ports:
+      - "8083:8083"
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+    depends_on:
+      - kafka
+
+  alert-service:
+    build:
+      context: .
+      dockerfile: alert-service/Dockerfile
+    container_name: alert-service
+    ports:
+      - "8084:8084"
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+    depends_on:
+      - kafka
 
 networks:
   default:
@@ -78,4 +104,3 @@ networks:
 
 volumes:
   postgres_data:
-  jenkins_home:

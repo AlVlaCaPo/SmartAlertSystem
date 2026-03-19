@@ -7,14 +7,14 @@ COPY auth-service/pom.xml auth-service/
 COPY data-collector-service/pom.xml data-collector-service/
 COPY alert-service/pom.xml alert-service/
 # Descargar dependencias (cache)
-RUN mvn dependency:go-offline -B -pl auth-service -am
+RUN mvn dependency:go-offline -B -pl data-collector-service -am
 # Copiar el código fuente y compilar
-COPY auth-service/src auth-service/src
-RUN mvn clean package -pl auth-service -am
+COPY data-collector-service/src data-collector-service/src
+RUN mvn clean package -pl data-collector-service -am
 
 # Etapa 2: Imagen de ejecución ligera
 FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
-COPY --from=build /app/auth-service/target/*.jar app.jar
-EXPOSE 8081
+COPY --from=build /app/data-collector-service/target/*.jar app.jar
+EXPOSE 8083
 ENTRYPOINT ["java", "-jar", "app.jar"]
