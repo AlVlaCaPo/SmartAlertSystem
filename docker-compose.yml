@@ -56,9 +56,26 @@ services:
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
       KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
 
+  jenkins:
+    build:
+      context: .
+      dockerfile: jenkins-docker.Dockerfile
+    container_name: jenkins
+    privileged: true
+    user: root
+    ports:
+      - "8082:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - auth-service
+
 networks:
   default:
     name: smart-alert-network
 
 volumes:
   postgres_data:
+  jenkins_home:
